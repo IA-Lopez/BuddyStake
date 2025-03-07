@@ -6,7 +6,7 @@ import { createPublicClient, custom, encodeFunctionData, parseUnits } from "viem
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const STAKING_CONTRACTS = {
-  electroneum: "0x22fa4f932595114e2115d85320b6d9152447e226",
+  electroneum: "0x007481e3F2C1ee5E4e767639C29c726b246Dd743",
 };
 
 const BUDDY_TOKEN_ADDRESS = "0x38B54f147303887BD2E932373432FfCBD11Ff6a5";
@@ -27,10 +27,16 @@ export default function Home() {
   const [individualEffective, setIndividualEffective] = useState("0");
   const [individualMultiplier, setIndividualMultiplier] = useState("0");
   const [individualStakeTime, setIndividualStakeTime] = useState("N/A");
-  // Nuevo estado para guardar el timestamp del stake
+  // State to store stake timestamp for bonus countdown
   const [stakeTimestamp, setStakeTimestamp] = useState(0);
-  // Estado para el contador del bonus
+  // Bonus timer (30 days now)
   const [bonusTimeRemaining, setBonusTimeRemaining] = useState("N/A");
+
+  // New contract parameters
+  const [minStakingPeriodState, setMinStakingPeriodState] = useState("N/A");
+  const [earlyWithdrawalPeriodState, setEarlyWithdrawalPeriodState] = useState("N/A");
+  const [earlyWithdrawalPenaltyState, setEarlyWithdrawalPenaltyState] = useState("N/A");
+  const [totalRewardsAccumulatedState, setTotalRewardsAccumulatedState] = useState("N/A");
 
   useEffect(() => {
     if (isConnected) {
@@ -38,7 +44,7 @@ export default function Home() {
     }
   }, [isConnected, chain]);
 
-  // Actualiza la info cada 2 segundos
+  // Fetch staking info every 2 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       fetchStakingInfo();
@@ -46,9 +52,9 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [contractAddress, address, chain]);
 
-  // Update timer
+  // Update bonus timer (30 days)
   useEffect(() => {
-    const BONUS_PERIOD_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+    const BONUS_PERIOD_MS = 30 * 24 * 60 * 60 * 1000;
     const timer = setInterval(() => {
       if (stakeTimestamp > 0) {
         const bonusEnd = stakeTimestamp * 1000 + BONUS_PERIOD_MS;
@@ -336,7 +342,7 @@ export default function Home() {
     }
   };
 
-  // Función para obtener información global e individual del staking y calcular el APY
+  // Fetch staking info including new parameters and accumulated rewards
   const fetchStakingInfo = async () => {
     if (!window.ethereum || !contractAddress || !address) return;
     try {
@@ -414,7 +420,7 @@ export default function Home() {
         args: [BUDDY_TOKEN_ADDRESS],
       });
 
-      // Calcular APY
+      // Calculate APY
       const rewardRate = Number(rewardDataTuple[0]);
       const totalEff = Number(totalEffectiveData);
       let apyValue = 0;
@@ -431,7 +437,7 @@ export default function Home() {
       setTotalActual(totalActualFormatted.toFixed(4));
       setTotalEffective(totalEffectiveFormatted.toFixed(4));
 
-      // Información individual del stake
+      // Individual stake info
       const stakeInfoTuple = await client.readContract({
         address: contractAddress,
         abi: [
@@ -463,27 +469,77 @@ export default function Home() {
 
       setIndividualActual(indActual.toFixed(4));
       setIndividualEffective(indEffective.toFixed(4));
-      // Mostrar multiplier en formato (+X.XX%)
       const multiplierFormatted = (indMultiplier - 1) * 100;
       setIndividualMultiplier(multiplierFormatted.toFixed(2));
       setIndividualStakeTime(stakeDate);
-      // Guardar el timestamp para el contador del bonus
       setStakeTimestamp(indTimestamp);
+
+      // New parameters: minStakingPeriod, earlyWithdrawalPeriod, earlyWithdrawalPenalty, totalRewardsAccumulated
+      const minStakingPeriodData = await client.readContract({
+        address: contractAddress,
+        abi: [{
+          name: "minStakingPeriod",
+          type: "function",
+          inputs: [],
+          outputs: [{ name: "", type: "uint256" }],
+          stateMutability: "view",
+        }],
+        functionName: "minStakingPeriod",
+        args: [],
+      });
+      setMinStakingPeriodState((Number(minStakingPeriodData) / (3600 * 24)).toFixed(0));
+
+      const earlyWithdrawalPeriodData = await client.readContract({
+        address: contractAddress,
+        abi: [{
+          name: "earlyWithdrawalPeriod",
+          type: "function",
+          inputs: [],
+          outputs: [{ name: "", type: "uint256" }],
+          stateMutability: "view",
+        }],
+        functionName: "earlyWithdrawalPeriod",
+        args: [],
+      });
+      setEarlyWithdrawalPeriodState((Number(earlyWithdrawalPeriodData) / (3600 * 24)).toFixed(0));
+
+      const earlyWithdrawalPenaltyData = await client.readContract({
+        address: contractAddress,
+        abi: [{
+          name: "earlyWithdrawalPenalty",
+          type: "function",
+          inputs: [],
+          outputs: [{ name: "", type: "uint256" }],
+          stateMutability: "view",
+        }],
+        functionName: "earlyWithdrawalPenalty",
+        args: [],
+      });
+      setEarlyWithdrawalPenaltyState(((Number(earlyWithdrawalPenaltyData) / 1e18) * 100).toFixed(0) + "%");
+
+      const totalRewardsAccumulatedData = await client.readContract({
+        address: contractAddress,
+        abi: [{
+          name: "totalRewardsAccumulated",
+          type: "function",
+          inputs: [{ name: "", type: "address" }],
+          outputs: [{ name: "", type: "uint256" }],
+          stateMutability: "view",
+        }],
+        functionName: "totalRewardsAccumulated",
+        args: [BUDDY_TOKEN_ADDRESS],
+      });
+      const accumulatedRewardsFormatted = Number(totalRewardsAccumulatedData) / 1e18;
+      setTotalRewardsAccumulatedState(accumulatedRewardsFormatted.toFixed(4));
+
     } catch (error) {
       console.error("Error fetching staking info:", error);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white py-12 pt-24">
+    <div className="min-h-screen bg-gray-900 text-white py-12 pt-24 flex items-center">
       <div className="max-w-6xl mx-auto px-4">
-        {/* Header */}
-        <header className="text-center mb-12">
-          <h1 className="text-5xl font-extrabold">Buddy Staking Dashboard</h1>
-          <p className="mt-4 text-xl text-gray-300">
-            Manage your stakes and view your rewards
-          </p>
-        </header>
         {!isConnected ? (
           <div className="flex flex-col items-center">
             <p className="text-xl mb-6">
@@ -494,89 +550,125 @@ export default function Home() {
         ) : (
           <div className="space-y-10">
             {/* Info Panels */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
               {/* Global Staking Info */}
-              <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-6 rounded-xl shadow-2xl">
-                <h2 className="text-2xl font-bold mb-4">Global Staking Info</h2>
+              <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-6 rounded-xl shadow-2xl flex flex-col items-center justify-center text-center">
+                <h2 className="text-3xl font-bold mb-3">Global Staking Info</h2>
                 <div className="space-y-2">
-                  <p>
-                    <span className="font-bold">APY:</span> {apy} %
-                  </p>
-                  <p>
-                    <span className="font-bold">Total Staked:</span> {totalActual} $BUDDY
-                  </p>
+                  <div>
+                    <p className="text-sm uppercase text-gray-300">APY</p>
+                    <p className="text-2xl font-extrabold">{parseFloat(apy).toFixed(0)} %</p>
+                  </div>
+                  <div>
+                    <p className="text-sm uppercase text-gray-300">Total Staked</p>
+                    <p className="text-2xl font-extrabold">{parseFloat(totalActual).toFixed(2)} BUDDY</p>
+                  </div>
+                  <div>
+                    <p className="text-sm uppercase text-gray-300">Total Rewards Given</p>
+                    <p className="text-2xl font-extrabold">{parseFloat(totalRewardsAccumulatedState).toFixed(2)} BUDDY</p>
+                  </div>
                 </div>
               </div>
-              {/* Unclaimed Rewards (más destacado) */}
-              <div className="bg-gradient-to-br from-pink-500 to-yellow-500 p-6 rounded-xl shadow-2xl flex flex-col justify-center">
-                <h2 className="text-2xl font-bold mb-4">Unclaimed Rewards</h2>
-                <p className="text-4xl font-extrabold">{earnedRewards} $BUDDY</p>
+              {/* Unclaimed Rewards */}
+              <div className="bg-gradient-to-br from-pink-500 to-yellow-500 p-6 rounded-xl shadow-2xl flex flex-col items-center justify-center text-center">
+                <h2 className="text-3xl font-bold mb-3">Unclaimed Rewards</h2>
+                <p className="text-5xl font-extrabold">{parseFloat(earnedRewards).toFixed(2)} BUDDY</p>
               </div>
               {/* My Staking Details */}
-              <div className="bg-gradient-to-br from-green-600 to-green-800 p-6 rounded-xl shadow-2xl">
-                <h2 className="text-2xl font-bold mb-4">My Staking Details</h2>
+              <div className="bg-gradient-to-br from-green-600 to-green-800 p-6 rounded-xl shadow-2xl flex flex-col items-center justify-center text-center">
+                <h2 className="text-3xl font-bold mb-3">My Staking Details</h2>
                 <div className="space-y-2">
-                  <p>
-                    <span className="font-bold">Stake Time:</span> {individualStakeTime}
-                  </p>
+                  <div>
+                    <p className="text-sm uppercase text-gray-300">Stake Time</p>
+                    <p className="text-2xl font-extrabold">{individualStakeTime}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm uppercase text-gray-300">Actual Staked</p>
+                    <p className="text-2xl font-extrabold">{parseFloat(individualActual).toFixed(2)} BUDDY</p>
+                  </div>
+                  <div>
+                    <p className="text-sm uppercase text-gray-300">Effective Staked</p>
+                    <p className="text-2xl font-extrabold">
+                      {parseFloat(individualEffective).toFixed(2)} BUDDY 
+                      <span className="text-green-300"> (+{individualMultiplier}%)</span>
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href="https://mint.buddybattles.xyz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-block bg-white text-blue-600 font-bold py-3 px-6 rounded-full shadow-lg hover:shadow-xl transition duration-200"
+                >
+                  Want a bonus?
+                  <div>Mint BPP NFT!!</div>
+                </a>
+              </div>
+              {/* Staking Parameters & Accumulated Rewards */}
+              <div className="bg-gradient-to-br from-blue-500 to-teal-500 p-6 rounded-xl shadow-2xl flex flex-col items-center justify-center text-center">
+                <h2 className="text-3xl font-bold mb-3">Parameters & Rewards</h2>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-sm uppercase text-gray-300">Bonus Period</p>
+                    <p className="text-2xl font-extrabold">{minStakingPeriodState} days</p>
+                  </div>
+                  <div>
+                    <p className="text-sm uppercase text-gray-300">Early Withdrawal</p>
+                    <p className="text-2xl font-extrabold">{earlyWithdrawalPeriodState} days</p>
+                  </div>
+                  <div>
+                    <p className="text-sm uppercase text-gray-300">Withdrawal Penalty</p>
+                    <p className="text-2xl font-extrabold">{earlyWithdrawalPenaltyState}</p>
+                  </div>
                   {stakeTimestamp > 0 && (
-                    <>
-                      <p>
-                        <span className="font-bold">Time for full bonus:</span>{" "}
-                        {bonusTimeRemaining}
-                      </p>
+                    <div>
+                      <p className="text-sm uppercase text-gray-300">Time for Full Bonus</p>
+                      <p className="text-2xl font-extrabold">{bonusTimeRemaining}</p>
                       {bonusTimeRemaining === "Finished" && (
-                        <p className="text-red-500 font-semibold">
-                          ¡Elegible for full bonus, click Update Multiplier!
+                        <p className="text-red-500 font-semibold text-lg">
+                          Eligible! Click Update Multiplier!
                         </p>
                       )}
-                    </>
+                    </div>
                   )}
-                  <p>
-                    <span className="font-bold">Actual Staked:</span> {individualActual} $BUDDY
-                  </p>
-                  <p>
-                    <span className="font-bold">Effective Staked:</span> {individualEffective} $BUDDY{" "}
-                    <span className="text-green-300">(+{individualMultiplier}%)</span>
-                  </p>
                 </div>
               </div>
             </div>
             {/* Operations Panel */}
             <div className="bg-gray-800 p-6 rounded-xl shadow-2xl">
-              <h2 className="text-2xl font-bold mb-4">Staking Operations</h2>
+              <h2 className="text-3xl font-bold mb-4 text-center">Staking Operations</h2>
               <div className="mb-6">
                 <input
                   type="text"
                   placeholder="Amount (in Buddy tokens)"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full p-4 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-4 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xl"
                 />
               </div>
-              <div className="flex flex-wrap gap-4 justify-center">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <button
                   onClick={handleStake}
-                  className="bg-green-600 hover:bg-green-700 transition duration-200 py-3 px-6 rounded-lg"
+                  className="bg-green-600 hover:bg-green-700 transition duration-200 py-3 px-6 rounded-lg text-xl font-bold"
                 >
                   Stake
                 </button>
                 <button
                   onClick={handleUnstake}
-                  className="bg-red-600 hover:bg-red-700 transition duration-200 py-3 px-6 rounded-lg"
+                  className="bg-red-600 hover:bg-red-700 transition duration-200 py-3 px-6 rounded-lg text-xl font-bold"
                 >
                   Unstake
                 </button>
                 <button
                   onClick={handleClaimRewards}
-                  className="bg-blue-600 hover:bg-blue-700 transition duration-200 py-3 px-6 rounded-lg"
+                  className="bg-blue-600 hover:bg-blue-700 transition duration-200 py-3 px-6 rounded-lg text-xl font-bold"
                 >
                   Claim Rewards
                 </button>
                 {bonusTimeRemaining === "Finished" && (
                   <button
                     onClick={handleUpdateMultiplier}
-                    className="bg-yellow-600 hover:bg-yellow-700 transition duration-200 py-3 px-6 rounded-lg"
+                    className="bg-yellow-600 hover:bg-yellow-700 transition duration-200 py-3 px-6 rounded-lg text-xl font-bold"
                   >
                     Update Multiplier
                   </button>
@@ -588,5 +680,4 @@ export default function Home() {
       </div>
     </div>
   );
-  
 }
