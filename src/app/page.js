@@ -5,12 +5,10 @@ import { useAccount } from "wagmi";
 import { createPublicClient, custom, encodeFunctionData, parseUnits } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
-// Dirección del contrato de staking (según la red)
 const STAKING_CONTRACTS = {
   electroneum: "0x22fa4f932595114e2115d85320b6d9152447e226",
 };
 
-// Dirección del token Buddy (ERC‑20) – se usará de forma fija
 const BUDDY_TOKEN_ADDRESS = "0x38B54f147303887BD2E932373432FfCBD11Ff6a5";
 
 export default function Home() {
@@ -18,11 +16,17 @@ export default function Home() {
   const [contractAddress, setContractAddress] = useState("");
   const [amount, setAmount] = useState("");
 
-  // Estados para información del staking
-  const [apy, setAPY] = useState("");
-  const [earnedRewards, setEarnedRewards] = useState("");
-  const [totalActual, setTotalActual] = useState("");
-  const [totalEffective, setTotalEffective] = useState("");
+  // Global staking info
+  const [apy, setAPY] = useState("N/A");
+  const [earnedRewards, setEarnedRewards] = useState("N/A");
+  const [totalActual, setTotalActual] = useState("N/A");
+  const [totalEffective, setTotalEffective] = useState("N/A");
+
+  // Individual staking info
+  const [individualActual, setIndividualActual] = useState("0");
+  const [individualEffective, setIndividualEffective] = useState("0");
+  const [individualMultiplier, setIndividualMultiplier] = useState("0");
+  const [individualStakeTime, setIndividualStakeTime] = useState("N/A");
 
   useEffect(() => {
     if (isConnected) {
@@ -30,7 +34,7 @@ export default function Home() {
     }
   }, [isConnected, chain]);
 
-  // Actualiza la info cada 2 segundos
+  // Actualizar info cada 2 segundos
   useEffect(() => {
     const interval = setInterval(() => {
       fetchStakingInfo();
@@ -38,7 +42,6 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [contractAddress, address, chain]);
 
-  // Función para esperar a que se confirme una transacción
   const waitForTransactionReceipt = async (txHash) => {
     let receipt = null;
     while (!receipt) {
@@ -53,7 +56,6 @@ export default function Home() {
     return receipt;
   };
 
-  // Función para aprobar el gasto de tokens si es necesario
   const checkAndApprove = async (requiredAmount) => {
     const client = createPublicClient({
       chain: chain.id,
@@ -124,7 +126,6 @@ export default function Home() {
     }
   };
 
-  // Función para hacer stake
   const handleStake = async () => {
     if (!amount || !isConnected) return;
     try {
@@ -166,7 +167,6 @@ export default function Home() {
     }
   };
 
-  // Función para hacer unstake
   const handleUnstake = async () => {
     if (!amount || !isConnected) return;
     try {
@@ -205,7 +205,6 @@ export default function Home() {
     }
   };
 
-  // Función para reclamar rewards
   const handleClaimRewards = async () => {
     if (!isConnected) return;
     try {
@@ -241,7 +240,6 @@ export default function Home() {
     }
   };
 
-  // Función para actualizar el multiplicador
   const handleUpdateMultiplier = async () => {
     if (!isConnected) return;
     try {
@@ -277,7 +275,6 @@ export default function Home() {
     }
   };
 
-  // Función para retirar todo el stake
   const handleWithdrawAll = async () => {
     if (!isConnected) return;
     try {
@@ -313,7 +310,7 @@ export default function Home() {
     }
   };
 
-  // Función para obtener información del staking y calcular el APY
+  // Función para obtener información global e individual del staking y calcular el APY
   const fetchStakingInfo = async () => {
     if (!window.ethereum || !contractAddress || !address) return;
     try {
@@ -322,7 +319,7 @@ export default function Home() {
         transport: custom(window.ethereum),
       });
 
-      // Leer rewardData (se accede por índice, ya que se devuelve como array)
+      // Global info
       const rewardDataTuple = await client.readContract({
         address: contractAddress,
         abi: [
@@ -343,7 +340,6 @@ export default function Home() {
         args: [BUDDY_TOKEN_ADDRESS],
       });
 
-      // Leer totalEffectiveStaked
       const totalEffectiveData = await client.readContract({
         address: contractAddress,
         abi: [
@@ -359,7 +355,6 @@ export default function Home() {
         args: [BUDDY_TOKEN_ADDRESS],
       });
 
-      // Leer earned rewards para el usuario
       const earnedData = await client.readContract({
         address: contractAddress,
         abi: [
@@ -378,7 +373,6 @@ export default function Home() {
         args: [BUDDY_TOKEN_ADDRESS, address],
       });
 
-      // Leer totalActualStaked
       const totalActualData = await client.readContract({
         address: contractAddress,
         abi: [
@@ -394,8 +388,8 @@ export default function Home() {
         args: [BUDDY_TOKEN_ADDRESS],
       });
 
-      // Convertir a números (asumiendo 18 decimales)
-      const rewardRate = Number(rewardDataTuple[0]); // rewardRate
+      // Calcular APY
+      const rewardRate = Number(rewardDataTuple[0]);
       const totalEff = Number(totalEffectiveData);
       let apyValue = 0;
       if (totalEff > 0) {
@@ -410,54 +404,115 @@ export default function Home() {
       setEarnedRewards(earnedFormatted.toFixed(4));
       setTotalActual(totalActualFormatted.toFixed(4));
       setTotalEffective(totalEffectiveFormatted.toFixed(4));
+
+      // Información individual del stake
+      const stakeInfoTuple = await client.readContract({
+        address: contractAddress,
+        abi: [
+          {
+            name: "stakes",
+            type: "function",
+            inputs: [
+              { name: "", type: "address" },
+              { name: "", type: "address" }
+            ],
+            outputs: [
+              { name: "actualAmount", type: "uint256" },
+              { name: "effectiveAmount", type: "uint256" },
+              { name: "stakeTimestamp", type: "uint256" },
+              { name: "multiplier", type: "uint256" }
+            ],
+            stateMutability: "view",
+          },
+        ],
+        functionName: "stakes",
+        args: [BUDDY_TOKEN_ADDRESS, address],
+      });
+
+      const indActual = Number(stakeInfoTuple[0]) / 1e18;
+      const indEffective = Number(stakeInfoTuple[1]) / 1e18;
+      const indMultiplier = Number(stakeInfoTuple[3]) / 1e18;
+      const indTimestamp = Number(stakeInfoTuple[2]);
+      const stakeDate = indTimestamp > 0 ? new Date(indTimestamp * 1000).toLocaleString() : "N/A";
+
+      setIndividualActual(indActual.toFixed(4));
+      setIndividualEffective(indEffective.toFixed(4));
+      setIndividualMultiplier(indMultiplier.toFixed(4));
+      setIndividualStakeTime(stakeDate);
     } catch (error) {
       console.error("Error fetching staking info:", error);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
-      <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-lg">
+    <div className="min-h-screen bg-gray-900 text-white pt-24">
+      <div className="container mx-auto px-4">
+        {/* Header */}
+        <header className="mb-12 text-center">
+          <h1 className="text-4xl font-bold">Buddy Staking Dashboard</h1>
+          <p className="mt-2 text-lg">Manage your stakes and view your rewards</p>
+        </header>
         {!isConnected ? (
           <div className="flex flex-col items-center">
-            <p className="mb-4">Connect your wallet to access staking functions</p>
+            <p className="mb-4 text-xl">Connect your wallet to access staking functions</p>
             <ConnectButton />
           </div>
         ) : (
-          <div>
-            <p className="mb-4 text-center">Connected as: {address}</p>
-            <div className="space-y-4">
-              <input
-                type="text"
-                placeholder="Amount (in Buddy tokens)"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded"
-              />
-              <div className="flex flex-col space-y-2">
-                <button onClick={handleStake} className="bg-green-600 hover:bg-green-700 py-2 rounded">
+          <div className="space-y-12">
+            {/* Global Info Panel */}
+            <div className="bg-gray-700 p-6 rounded-lg shadow-md">
+              <h2 className="text-2xl font-bold mb-4">Global Staking Info</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <p>APY: <span className="font-semibold">{apy} %</span></p>
+                <p>Total Actual Staked: <span className="font-semibold">{totalActual} tokens</span></p>
+                <p>Total Effective Staked: <span className="font-semibold">{totalEffective} tokens</span></p>
+              </div>
+            </div>
+
+            {/* Individual Info Panel */}
+            <div className="bg-gray-700 p-6 rounded-lg shadow-md">
+              <h2 className="text-2xl font-bold mb-4">My Staking Details</h2>
+              <div className="grid grid-cols-2 gap-4">
+                <p>Earned Rewards: <span className="font-semibold">{earnedRewards} tokens</span></p>
+                <p>Actual Staked: <span className="font-semibold">{individualActual} tokens</span></p>
+                <p>
+                  Effective Staked: <span className="font-semibold">{individualEffective} tokens</span>
+                  <span className="text-green-500 ml-2">
+                    (x{parseFloat(individualMultiplier).toFixed(2)})
+                  </span>
+                </p>
+                <p>Stake Time: <span className="font-semibold">{individualStakeTime}</span></p>
+              </div>
+            </div>
+
+            {/* Staking Operations */}
+            <div className="bg-gray-700 p-6 rounded-lg shadow-md">
+              <h2 className="text-2xl font-bold mb-4">Staking Operations</h2>
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Amount (in Buddy tokens)"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="w-full p-3 rounded-lg bg-gray-800 border border-gray-600"
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <button onClick={handleStake} className="bg-green-600 hover:bg-green-700 py-3 rounded-lg">
                   Stake
                 </button>
-                <button onClick={handleUnstake} className="bg-red-600 hover:bg-red-700 py-2 rounded">
+                <button onClick={handleUnstake} className="bg-red-600 hover:bg-red-700 py-3 rounded-lg">
                   Unstake
                 </button>
-                <button onClick={handleClaimRewards} className="bg-blue-600 hover:bg-blue-700 py-2 rounded">
+                <button onClick={handleClaimRewards} className="bg-blue-600 hover:bg-blue-700 py-3 rounded-lg">
                   Claim Rewards
                 </button>
-                <button onClick={handleUpdateMultiplier} className="bg-yellow-600 hover:bg-yellow-700 py-2 rounded">
+                <button onClick={handleUpdateMultiplier} className="bg-yellow-600 hover:bg-yellow-700 py-3 rounded-lg">
                   Update Multiplier
                 </button>
-                <button onClick={handleWithdrawAll} className="bg-purple-600 hover:bg-purple-700 py-2 rounded">
+                <button onClick={handleWithdrawAll} className="bg-purple-600 hover:bg-purple-700 py-3 rounded-lg">
                   Withdraw All
                 </button>
-              </div>
-
-              <div className="mt-6 p-4 border border-gray-700 rounded">
-                <h2 className="text-xl font-bold mb-2">Staking Info</h2>
-                <p>APY: {apy ? `${apy} %` : "N/A"}</p>
-                <p>Earned Rewards: {earnedRewards ? `${earnedRewards} tokens` : "N/A"}</p>
-                <p>Total Actual Staked: {totalActual ? `${totalActual} tokens` : "N/A"}</p>
-                <p>Total Effective Staked: {totalEffective ? `${totalEffective} tokens` : "N/A"}</p>
               </div>
             </div>
           </div>
