@@ -34,7 +34,7 @@ export default function Home() {
     }
   }, [isConnected, chain]);
 
-  // Actualizar info cada 2 segundos
+  // Actualiza la info cada 2 segundos
   useEffect(() => {
     const interval = setInterval(() => {
       fetchStakingInfo();
@@ -437,7 +437,9 @@ export default function Home() {
 
       setIndividualActual(indActual.toFixed(4));
       setIndividualEffective(indEffective.toFixed(4));
-      setIndividualMultiplier(indMultiplier.toFixed(4));
+      // Mostrar multiplier en formato (+X.XX%)
+      const multiplierFormatted = (indMultiplier - 1) * 100;
+      setIndividualMultiplier(multiplierFormatted.toFixed(2));
       setIndividualStakeTime(stakeDate);
     } catch (error) {
       console.error("Error fetching staking info:", error);
@@ -462,8 +464,8 @@ export default function Home() {
             {/* Global Info Panel */}
             <div className="bg-gray-700 p-6 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold mb-4">Global Staking Info</h2>
-              <div className="grid grid-cols-2 gap-4">
-                <p>APY: <span className="font-semibold">{apy} %</span></p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <p>APY: <span className="font-semibold">{apy} %</span></p><br/>
                 <p>Total Actual Staked: <span className="font-semibold">{totalActual} tokens</span></p>
                 <p>Total Effective Staked: <span className="font-semibold">{totalEffective} tokens</span></p>
               </div>
@@ -472,20 +474,18 @@ export default function Home() {
             {/* Individual Info Panel */}
             <div className="bg-gray-700 p-6 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold mb-4">My Staking Details</h2>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <p>Stake Time: <span className="font-semibold">{individualStakeTime}</span></p>
                 <p>Earned Rewards: <span className="font-semibold">{earnedRewards} tokens</span></p>
                 <p>Actual Staked: <span className="font-semibold">{individualActual} tokens</span></p>
                 <p>
                   Effective Staked: <span className="font-semibold">{individualEffective} tokens</span>
-                  <span className="text-green-500 ml-2">
-                    (x{parseFloat(individualMultiplier).toFixed(2)})
-                  </span>
+                  <span className="text-green-500 ml-2">(+{individualMultiplier}%)</span>
                 </p>
-                <p>Stake Time: <span className="font-semibold">{individualStakeTime}</span></p>
               </div>
             </div>
 
-            {/* Staking Operations */}
+            {/* Operations Panel */}
             <div className="bg-gray-700 p-6 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold mb-4">Staking Operations</h2>
               <div className="mb-4">
