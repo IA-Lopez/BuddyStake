@@ -475,83 +475,112 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white pt-24">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-gray-900 text-white py-12 pt-24">
+      <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
-        <header className="mb-12 text-center">
-          <h1 className="text-4xl font-bold">Buddy Staking Dashboard</h1>
-          <p className="mt-2 text-lg">Manage your stakes and view your rewards</p>
+        <header className="text-center mb-12">
+          <h1 className="text-5xl font-extrabold">Buddy Staking Dashboard</h1>
+          <p className="mt-4 text-xl text-gray-300">
+            Manage your stakes and view your rewards
+          </p>
         </header>
         {!isConnected ? (
           <div className="flex flex-col items-center">
-            <p className="mb-4 text-xl">Connect your wallet to access staking functions</p>
+            <p className="text-xl mb-6">
+              Connect your wallet to access staking functions
+            </p>
             <ConnectButton />
           </div>
         ) : (
-          <div className="space-y-12">
-            {/* Global Info Panel */}
-            <div className="bg-gray-700 p-6 rounded-lg shadow-md">
-              <h2 className="text-2xl font-bold mb-4">Global Staking Info</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <p>APY: <span className="font-semibold">{apy} %</span></p>
-                <p>Total staked: <span className="font-semibold">{totalActual} $BUDDY</span></p>
+          <div className="space-y-10">
+            {/* Info Panels */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Global Staking Info */}
+              <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-6 rounded-xl shadow-2xl">
+                <h2 className="text-2xl font-bold mb-4">Global Staking Info</h2>
+                <div className="space-y-2">
+                  <p>
+                    <span className="font-bold">APY:</span> {apy} %
+                  </p>
+                  <p>
+                    <span className="font-bold">Total Staked:</span> {totalActual} $BUDDY
+                  </p>
+                </div>
+              </div>
+              {/* Unclaimed Rewards (más destacado) */}
+              <div className="bg-gradient-to-br from-pink-500 to-yellow-500 p-6 rounded-xl shadow-2xl flex flex-col justify-center">
+                <h2 className="text-2xl font-bold mb-4">Unclaimed Rewards</h2>
+                <p className="text-4xl font-extrabold">{earnedRewards} $BUDDY</p>
+              </div>
+              {/* My Staking Details */}
+              <div className="bg-gradient-to-br from-green-600 to-green-800 p-6 rounded-xl shadow-2xl">
+                <h2 className="text-2xl font-bold mb-4">My Staking Details</h2>
+                <div className="space-y-2">
+                  <p>
+                    <span className="font-bold">Stake Time:</span> {individualStakeTime}
+                  </p>
+                  {stakeTimestamp > 0 && (
+                    <>
+                      <p>
+                        <span className="font-bold">Time for full bonus:</span>{" "}
+                        {bonusTimeRemaining}
+                      </p>
+                      {bonusTimeRemaining === "Finished" && (
+                        <p className="text-red-500 font-semibold">
+                          ¡Elegible for full bonus, click Update Multiplier!
+                        </p>
+                      )}
+                    </>
+                  )}
+                  <p>
+                    <span className="font-bold">Actual Staked:</span> {individualActual} $BUDDY
+                  </p>
+                  <p>
+                    <span className="font-bold">Effective Staked:</span> {individualEffective} $BUDDY{" "}
+                    <span className="text-green-300">(+{individualMultiplier}%)</span>
+                  </p>
+                </div>
               </div>
             </div>
-
-            {/* Individual Info Panel */}
-            <div className="bg-gray-700 p-6 rounded-lg shadow-md">
-              <h2 className="text-2xl font-bold mb-4">My Staking Details</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <p>Stake Time: <span className="font-semibold">{individualStakeTime}</span></p>
-                {/* Mostrar contador del bonus */}
-                {stakeTimestamp > 0 && (
-                  <>
-                    <p>Time for full bonus: <span className="font-semibold">{bonusTimeRemaining}</span></p>
-                    {bonusTimeRemaining === "Finished" && (
-                      <p className="text-red-500">¡Elegible for full bonus, click Update Multiplier!</p>
-                    )}
-                  </>
-                )}
-                <p>Earned Rewards: <span className="font-semibold">{earnedRewards} $BUDDY</span></p>
-                <p>Actual Staked: <span className="font-semibold">{individualActual} $BUDDY</span></p>
-                <p>
-                  Effective Staked: <span className="font-semibold">{individualEffective} $BUDDY</span>
-                  <span className="text-green-500 ml-2">(+{individualMultiplier}%)</span>
-                </p>
-              </div>
-            </div>
-
             {/* Operations Panel */}
-            <div className="bg-gray-700 p-6 rounded-lg shadow-md">
+            <div className="bg-gray-800 p-6 rounded-xl shadow-2xl">
               <h2 className="text-2xl font-bold mb-4">Staking Operations</h2>
-              <div className="mb-4">
+              <div className="mb-6">
                 <input
                   type="text"
                   placeholder="Amount (in Buddy tokens)"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  className="w-full p-3 rounded-lg bg-gray-800 border border-gray-600"
+                  className="w-full p-4 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <button onClick={handleStake} className="bg-green-600 hover:bg-green-700 py-3 rounded-lg">
+              <div className="flex flex-wrap gap-4 justify-center">
+                <button
+                  onClick={handleStake}
+                  className="bg-green-600 hover:bg-green-700 transition duration-200 py-3 px-6 rounded-lg"
+                >
                   Stake
                 </button>
-                <button onClick={handleUnstake} className="bg-red-600 hover:bg-red-700 py-3 rounded-lg">
+                <button
+                  onClick={handleUnstake}
+                  className="bg-red-600 hover:bg-red-700 transition duration-200 py-3 px-6 rounded-lg"
+                >
                   Unstake
                 </button>
-                <button onClick={handleClaimRewards} className="bg-blue-600 hover:bg-blue-700 py-3 rounded-lg">
+                <button
+                  onClick={handleClaimRewards}
+                  className="bg-blue-600 hover:bg-blue-700 transition duration-200 py-3 px-6 rounded-lg"
+                >
                   Claim Rewards
                 </button>
                 {bonusTimeRemaining === "Finished" && (
-                  <button onClick={handleUpdateMultiplier} className="bg-yellow-600 hover:bg-yellow-700 py-3 rounded-lg">
+                  <button
+                    onClick={handleUpdateMultiplier}
+                    className="bg-yellow-600 hover:bg-yellow-700 transition duration-200 py-3 px-6 rounded-lg"
+                  >
                     Update Multiplier
                   </button>
                 )}
-
-                 {/*<button onClick={handleWithdrawAll} className="bg-purple-600 hover:bg-purple-700 py-3 rounded-lg">
-                  Withdraw All
-                </button>*/}
               </div>
             </div>
           </div>
@@ -559,4 +588,5 @@ export default function Home() {
       </div>
     </div>
   );
+  
 }
