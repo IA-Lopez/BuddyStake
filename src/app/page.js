@@ -27,6 +27,10 @@ export default function Home() {
   const [individualEffective, setIndividualEffective] = useState("0");
   const [individualMultiplier, setIndividualMultiplier] = useState("0");
   const [individualStakeTime, setIndividualStakeTime] = useState("N/A");
+  // Nuevo estado para guardar el timestamp del stake
+  const [stakeTimestamp, setStakeTimestamp] = useState(0);
+  // Estado para el contador del bonus
+  const [bonusTimeRemaining, setBonusTimeRemaining] = useState("N/A");
 
   useEffect(() => {
     if (isConnected) {
@@ -41,6 +45,28 @@ export default function Home() {
     }, 2000);
     return () => clearInterval(interval);
   }, [contractAddress, address, chain]);
+
+  // Update timer
+  useEffect(() => {
+    const BONUS_PERIOD_MS = 14 * 24 * 60 * 60 * 1000; // 14 days
+    const timer = setInterval(() => {
+      if (stakeTimestamp > 0) {
+        const bonusEnd = stakeTimestamp * 1000 + BONUS_PERIOD_MS;
+        const now = Date.now();
+        const diff = bonusEnd - now;
+        if (diff > 0) {
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+          setBonusTimeRemaining(`${days}d ${hours}h ${minutes}m ${seconds}s`);
+        } else {
+          setBonusTimeRemaining("Finished");
+        }
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [stakeTimestamp]);
 
   const waitForTransactionReceipt = async (txHash) => {
     let receipt = null;
@@ -441,6 +467,8 @@ export default function Home() {
       const multiplierFormatted = (indMultiplier - 1) * 100;
       setIndividualMultiplier(multiplierFormatted.toFixed(2));
       setIndividualStakeTime(stakeDate);
+      // Guardar el timestamp para el contador del bonus
+      setStakeTimestamp(indTimestamp);
     } catch (error) {
       console.error("Error fetching staking info:", error);
     }
@@ -465,9 +493,8 @@ export default function Home() {
             <div className="bg-gray-700 p-6 rounded-lg shadow-md">
               <h2 className="text-2xl font-bold mb-4">Global Staking Info</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <p>APY: <span className="font-semibold">{apy} %</span></p><br/>
-                <p>Total Actual Staked: <span className="font-semibold">{totalActual} tokens</span></p>
-                <p>Total Effective Staked: <span className="font-semibold">{totalEffective} tokens</span></p>
+                <p>APY: <span className="font-semibold">{apy} %</span></p>
+                <p>Total staked: <span className="font-semibold">{totalActual} $BUDDY</span></p>
               </div>
             </div>
 
@@ -476,10 +503,19 @@ export default function Home() {
               <h2 className="text-2xl font-bold mb-4">My Staking Details</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <p>Stake Time: <span className="font-semibold">{individualStakeTime}</span></p>
-                <p>Earned Rewards: <span className="font-semibold">{earnedRewards} tokens</span></p>
-                <p>Actual Staked: <span className="font-semibold">{individualActual} tokens</span></p>
+                {/* Mostrar contador del bonus */}
+                {stakeTimestamp > 0 && (
+                  <>
+                    <p>Time for full bonus: <span className="font-semibold">{bonusTimeRemaining}</span></p>
+                    {bonusTimeRemaining === "Finished" && (
+                      <p className="text-red-500">¡Elegible for full bonus, click Update Multiplier!</p>
+                    )}
+                  </>
+                )}
+                <p>Earned Rewards: <span className="font-semibold">{earnedRewards} $BUDDY</span></p>
+                <p>Actual Staked: <span className="font-semibold">{individualActual} $BUDDY</span></p>
                 <p>
-                  Effective Staked: <span className="font-semibold">{individualEffective} tokens</span>
+                  Effective Staked: <span className="font-semibold">{individualEffective} $BUDDY</span>
                   <span className="text-green-500 ml-2">(+{individualMultiplier}%)</span>
                 </p>
               </div>
@@ -507,12 +543,15 @@ export default function Home() {
                 <button onClick={handleClaimRewards} className="bg-blue-600 hover:bg-blue-700 py-3 rounded-lg">
                   Claim Rewards
                 </button>
-                <button onClick={handleUpdateMultiplier} className="bg-yellow-600 hover:bg-yellow-700 py-3 rounded-lg">
-                  Update Multiplier
-                </button>
-                <button onClick={handleWithdrawAll} className="bg-purple-600 hover:bg-purple-700 py-3 rounded-lg">
+                {bonusTimeRemaining === "Finished" && (
+                  <button onClick={handleUpdateMultiplier} className="bg-yellow-600 hover:bg-yellow-700 py-3 rounded-lg">
+                    Update Multiplier
+                  </button>
+                )}
+
+                 {/*<button onClick={handleWithdrawAll} className="bg-purple-600 hover:bg-purple-700 py-3 rounded-lg">
                   Withdraw All
-                </button>
+                </button>*/}
               </div>
             </div>
           </div>
