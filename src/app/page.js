@@ -16,6 +16,7 @@ export default function Home() {
   const [contractAddress, setContractAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [operation, setOperation] = useState("stake");
+  const [showInfo, setShowInfo] = useState(false);
 
   // Global staking info
   const [apy, setAPY] = useState("N/A");
@@ -720,7 +721,7 @@ export default function Home() {
                 <div className="space-y-2">
                   <div>
                     <p className="text-sm uppercase text-gray-300">APY</p>
-                    <p className="text-2xl font-extrabold">{parseFloat(apy).toFixed(2)} %</p>
+                    <p className="text-4xl font-extrabold">{parseFloat(apy).toFixed(2)} %</p>
                   </div>
                   <div>
                     <p className="text-sm uppercase text-gray-300">Total Staked</p>
@@ -738,46 +739,60 @@ export default function Home() {
                 <p className="text-5xl font-extrabold">{parseFloat(earnedRewards).toFixed(2)} BUDDY</p>
               </div>
               {/* My Staking */}
-              <div className="bg-gradient-to-br from-green-600 to-green-800 p-2 pt-4 pb-4 rounded-xl shadow-2xl flex flex-col items-center justify-center text-center transition-all duration-300">
+              <div className="bg-gradient-to-br from-green-600 to-green-800 p-2 pt-6 pb-6 rounded-xl shadow-2xl flex flex-col items-center justify-center text-center transition-all duration-300">
                 <h2 className="text-3xl font-bold mb-3">My Staking</h2>
                 <div className="space-y-2">
                   <div>
                     <p className="text-sm uppercase text-gray-300">Stake Time</p>
-                    <p className="text-l font-extrabold">{individualStakeTime}</p>
+                    <p className="text-xl font-extrabold">{individualStakeTime}</p>
                   </div>
                   <div>
                     <p className="text-sm uppercase text-gray-300">Staked Tokens</p>
                     <p className="text-2xl font-extrabold">{parseFloat(individualActual).toFixed(0)} BUDDY</p>
                   </div>
                   <div>
-                    <p className="text-sm uppercase text-gray-300">Staking Bonus <br /> (Buddy Platinum Pass)</p>
+                    <p className="text-sm uppercase text-gray-300">Staking Bonus</p>
                     <p className="text-2xl font-extrabold">
                       <span className="text-green-300"> +{individualMultiplier}%</span>
                     </p>
                   </div>
                 </div>
                 <div className="relative inline-block mt-6">
-                  <a
-                    href="https://mint.buddybattles.xyz"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="relative block bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-6 px-12 rounded-full shadow-lg hover:shadow-xl transition duration-300"
-                  >
-                    <span className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white text-blue-600 text-xs font-extrabold px-6 py-1 rounded-full shadow min-w-[150px] text-center">
-                      Want a Bonus?
-                    </span>
-
-                    Mint NFT
-                  </a>
-                  <p className="mt-3 text-sm text-gray-300 text-center">
-                    +2.5% extra per NFT first month, +5% extra after
-                  </p>
+                    <div className="relative">
+                      <a
+                        href="https://mint.buddybattles.xyz"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="relative block bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 px-12 rounded-full shadow-lg hover:shadow-xl transition duration-300"
+                      >
+                        <span className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white text-blue-600 text-[10px] font-extrabold px-6 py-1 rounded-full shadow min-w-[150px] text-center">
+                          Want a Bonus?
+                        </span>
+                        Mint NFT
+                      </a>
+                      <button
+                        onClick={() => setShowInfo(!showInfo)}
+                        className="absolute right-[-12px] top-[60%] w-6 h-6 bg-gray-200 rounded-full shadow hover:bg-gray-300 transition flex items-center justify-center"
+                      >
+                        <span className="text-xs font-bold text-blue-600">i</span>
+                      </button>
+                    </div>
+                    {showInfo && (
+                      <div className="absolute z-10 mt-2 p-2 bg-gray-100 text-gray-700 text-xs rounded shadow">
+                        +2.5% extra per NFT first month, +5% extra after
+                      </div>
+                    )}
+                  {showInfo && (
+                    <div className="absolute top-full left-0 z-10 mt-2 p-2 bg-gray-100 text-gray-700 text-xs rounded shadow">
+                      +2.5% extra per NFT first month, +5% extra after
+                    </div>
+                  )}
                 </div>
 
               </div>
               {/* Staking Parameters & Accumulated Rewards */}
               <div className="bg-gradient-to-br from-blue-500 to-teal-500 p-2 pt-4 pb-4 rounded-xl shadow-2xl flex flex-col items-center justify-center text-center transition-all duration-300">
-                <h2 className="text-3xl font-bold mb-3">Rewards and Penalties</h2>
+                <h2 className="text-3xl font-bold mb-3">Other info</h2>
                 <div className="space-y-2">
                   <div>
                     <p className="text-sm uppercase text-gray-300">Early Withdrawal</p>
