@@ -625,7 +625,7 @@ export default function Home() {
                 <div className="flex flex-col items-center transition-all duration-300">
                   <input
                     type="text"
-                    placeholder="Amount (Buddy)"
+                    placeholder="Amount (BUDDY)"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     className="w-full lg:w-1/2 p-3 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xl transition-all duration-300"
@@ -641,7 +641,7 @@ export default function Home() {
                 <div className="flex flex-col items-center space-y-4 transition-all duration-300">
                   <input
                     type="text"
-                    placeholder="Amount (in Buddy tokens)"
+                    placeholder="Amount (BUDDY)"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     className="w-full lg:w-1/2 p-3 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xl transition-all duration-300"
@@ -715,7 +715,7 @@ export default function Home() {
             {/* Info Panels */}
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 transition-all duration-300">
               {/* Global Staking Info */}
-              <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-2 rounded-xl shadow-2xl flex flex-col items-center justify-center text-center transition-all duration-300">
+              <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-2 pt-4 pb-4 rounded-xl shadow-2xl flex flex-col items-center justify-center text-center transition-all duration-300">
                 <h2 className="text-3xl font-bold mb-3">Global Staking</h2>
                 <div className="space-y-2">
                   <div>
@@ -733,7 +733,7 @@ export default function Home() {
                 </div>
               </div>
               {/* Unclaimed Rewards */}
-              <div className="bg-gradient-to-br from-pink-500 to-yellow-500 p-2 rounded-xl shadow-2xl flex flex-col items-center justify-center text-center transition-all duration-300">
+              <div className="bg-gradient-to-br from-pink-500 to-yellow-500 p-2 pt-4 pb-4 rounded-xl shadow-2xl flex flex-col items-center justify-center text-center transition-all duration-300">
                 <h2 className="text-3xl font-bold mb-3">Unclaimed Rewards</h2>
                 <p className="text-5xl font-extrabold">{parseFloat(earnedRewards).toFixed(2)} BUDDY</p>
               </div>
@@ -746,14 +746,13 @@ export default function Home() {
                     <p className="text-2xl font-extrabold">{individualStakeTime}</p>
                   </div>
                   <div>
-                    <p className="text-sm uppercase text-gray-300">Actual Staked</p>
+                    <p className="text-sm uppercase text-gray-300">Staked Tokens</p>
                     <p className="text-2xl font-extrabold">{parseFloat(individualActual).toFixed(0)} BUDDY</p>
                   </div>
                   <div>
-                    <p className="text-sm uppercase text-gray-300">Effective Staked</p>
+                    <p className="text-sm uppercase text-gray-300">Staking Bonus <br/> (Buddy Platinum Pass)</p>
                     <p className="text-2xl font-extrabold">
-                      {parseFloat(individualEffective).toFixed(0)} BUDDY
-                      <span className="text-green-300"> (+{individualMultiplier}%)</span>
+                      <span className="text-green-300"> +{individualMultiplier}%</span>
                     </p>
                   </div>
                 </div>
@@ -763,17 +762,14 @@ export default function Home() {
                   rel="noopener noreferrer"
                   className="mt-4 inline-block bg-white text-blue-600 font-bold py-3 px-6 rounded-full shadow-lg hover:shadow-xl transition duration-200 w-full lg:w-auto"
                 >
-                  Want a bonus? <div>Mint BPP NFT!!</div>
+                  Do you want a BONUS? <div>Mint BPP NFT!!</div>
                 </a>
+                <div className="mt-4"> 2.5% extra per NFT first month, 5% extra after</div>
               </div>
               {/* Staking Parameters & Accumulated Rewards */}
-              <div className="bg-gradient-to-br from-blue-500 to-teal-500 p-2 rounded-xl shadow-2xl flex flex-col items-center justify-center text-center transition-all duration-300">
+              <div className="bg-gradient-to-br from-blue-500 to-teal-500 p-2 pt-4 pb-4 rounded-xl shadow-2xl flex flex-col items-center justify-center text-center transition-all duration-300">
                 <h2 className="text-3xl font-bold mb-3">Parameters & Rewards</h2>
                 <div className="space-y-2">
-                  <div>
-                    <p className="text-sm uppercase text-gray-300">Bonus Period</p>
-                    <p className="text-2xl font-extrabold">{minStakingPeriodState} days</p>
-                  </div>
                   <div>
                     <p className="text-sm uppercase text-gray-300">Early Withdrawal</p>
                     <p className="text-2xl font-extrabold">{earlyWithdrawalPeriodState} days</p>
@@ -781,6 +777,10 @@ export default function Home() {
                   <div>
                     <p className="text-sm uppercase text-gray-300">Early Withdrawal Penalty</p>
                     <p className="text-2xl font-extrabold">{earlyWithdrawalPenaltyState}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm uppercase text-gray-300">Reduced Bonus Period</p>
+                    <p className="text-2xl font-extrabold">{minStakingPeriodState} days</p>
                   </div>
                   {stakeTimestamp > 0 && (
                     <div>
