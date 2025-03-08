@@ -768,7 +768,7 @@ export default function Home() {
               </div>
               {/* Staking Parameters & Accumulated Rewards */}
               <div className="bg-gradient-to-br from-blue-500 to-teal-500 p-2 pt-4 pb-4 rounded-xl shadow-2xl flex flex-col items-center justify-center text-center transition-all duration-300">
-                <h2 className="text-3xl font-bold mb-3">Parameters & Rewards</h2>
+                <h2 className="text-3xl font-bold mb-3">Rewards and Penalties</h2>
                 <div className="space-y-2">
                   <div>
                     <p className="text-sm uppercase text-gray-300">Early Withdrawal</p>
