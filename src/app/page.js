@@ -743,28 +743,37 @@ export default function Home() {
                 <div className="space-y-2">
                   <div>
                     <p className="text-sm uppercase text-gray-300">Stake Time</p>
-                    <p className="text-2xl font-extrabold">{individualStakeTime}</p>
+                    <p className="text-l font-extrabold">{individualStakeTime}</p>
                   </div>
                   <div>
                     <p className="text-sm uppercase text-gray-300">Staked Tokens</p>
                     <p className="text-2xl font-extrabold">{parseFloat(individualActual).toFixed(0)} BUDDY</p>
                   </div>
                   <div>
-                    <p className="text-sm uppercase text-gray-300">Staking Bonus <br/> (Buddy Platinum Pass)</p>
+                    <p className="text-sm uppercase text-gray-300">Staking Bonus <br /> (Buddy Platinum Pass)</p>
                     <p className="text-2xl font-extrabold">
                       <span className="text-green-300"> +{individualMultiplier}%</span>
                     </p>
                   </div>
                 </div>
-                <a
-                  href="https://mint.buddybattles.xyz"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-block bg-white text-blue-600 font-bold py-3 px-6 rounded-full shadow-lg hover:shadow-xl transition duration-200 w-full lg:w-auto"
-                >
-                  Do you want a BONUS? <div>Mint BPP NFT!!</div>
-                </a>
-                <div className="mt-4"> 2.5% extra per NFT first month, 5% extra after</div>
+                <div className="relative inline-block mt-6">
+                  <a
+                    href="https://mint.buddybattles.xyz"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="relative block bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-6 px-12 rounded-full shadow-lg hover:shadow-xl transition duration-300"
+                  >
+                    <span className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white text-blue-600 text-xs font-extrabold px-6 py-1 rounded-full shadow min-w-[150px] text-center">
+                      Want a Bonus?
+                    </span>
+
+                    Mint NFT
+                  </a>
+                  <p className="mt-3 text-sm text-gray-300 text-center">
+                    +2.5% extra per NFT first month, +5% extra after
+                  </p>
+                </div>
+
               </div>
               {/* Staking Parameters & Accumulated Rewards */}
               <div className="bg-gradient-to-br from-blue-500 to-teal-500 p-2 pt-4 pb-4 rounded-xl shadow-2xl flex flex-col items-center justify-center text-center transition-all duration-300">
