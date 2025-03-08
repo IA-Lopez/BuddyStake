@@ -484,7 +484,7 @@ export default function Home() {
       const totalActualFormatted = Number(totalActualData) / 1e18;
       const totalEffectiveFormatted = totalEff / 1e18;
 
-      setAPY(apyValue.toFixed(0));
+      setAPY(apyValue.toFixed(2));
       setEarnedRewards(earnedFormatted.toFixed(4));
       setTotalActual(totalActualFormatted.toFixed(0));
       setTotalEffective(totalEffectiveFormatted.toFixed(0));
@@ -720,7 +720,7 @@ export default function Home() {
                 <div className="space-y-2">
                   <div>
                     <p className="text-sm uppercase text-gray-300">APY</p>
-                    <p className="text-2xl font-extrabold">{parseFloat(apy).toFixed(0)} %</p>
+                    <p className="text-2xl font-extrabold">{parseFloat(apy).toFixed(2)} %</p>
                   </div>
                   <div>
                     <p className="text-sm uppercase text-gray-300">Total Staked</p>
