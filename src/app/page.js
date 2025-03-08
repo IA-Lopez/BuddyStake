@@ -522,7 +522,7 @@ export default function Home() {
       setIndividualActual(indActual.toFixed(0));
       setIndividualEffective(indEffective.toFixed(0));
       const multiplierFormatted = indMultiplier != 0 ? (indMultiplier - 1) * 100 : 0;
-      setIndividualMultiplier(multiplierFormatted.toFixed(0));
+      setIndividualMultiplier(multiplierFormatted.toFixed(2));
       setIndividualStakeTime(stakeDate);
       setStakeTimestamp(indTimestamp);
 
