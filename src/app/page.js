@@ -395,6 +395,41 @@ export default function Home() {
     }
   };
 
+  const handleSetMax = async () => {
+    if (!isConnected || !address) return;
+    try {
+      const client = createPublicClient({
+        chain: chain.id,
+        transport: custom(window.ethereum),
+      });
+  
+      const erc20ABI = [
+        {
+          name: "balanceOf",
+          type: "function",
+          inputs: [{ name: "account", type: "address" }],
+          outputs: [{ name: "", type: "uint256" }],
+          stateMutability: "view",
+        },
+      ];
+  
+      const balance = await client.readContract({
+        address: BUDDY_TOKEN_ADDRESS,
+        abi: erc20ABI,
+        functionName: "balanceOf",
+        args: [address],
+      });
+  
+      // Convertimos el balance (BigInt) a número formateado (con 18 decimales)
+      const balanceFormatted = Number(balance) / 1e18;
+      setAmount(balanceFormatted.toString());
+    } catch (err) {
+      console.error("Error fetching token balance:", err);
+      alert("Error fetching token balance: " + err.message);
+    }
+  };
+  
+
   // Fetch staking info including new parameters and accumulated rewards
   const fetchStakingInfo = async () => {
     if (!window.ethereum || !contractAddress || !address) return;
@@ -624,13 +659,22 @@ export default function Home() {
               </div>
               {operation === "stake" ? (
                 <div className="flex flex-col items-center transition-all duration-300">
-                  <input
-                    type="text"
-                    placeholder="Amount (BUDDY)"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    className="w-full lg:w-1/2 p-3 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xl transition-all duration-300"
-                  />
+                  <div className="relative w-full lg:w-1/2">
+                    <input
+                      type="text"
+                      placeholder="Amount (BUDDY)"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      className="w-full p-3 rounded-lg text-center bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xl transition-all duration-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSetMax} // Esta función debe llamar al contrato y setear el valor en el input
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white text-sm font-bold"
+                    >
+                      MAX
+                    </button>
+                  </div>
                   <button
                     onClick={handleStake}
                     className="mt-4 bg-green-600 hover:bg-green-700 transition duration-200 py-3 px-6 rounded-lg text-xl font-bold w-full max-w-xs"
@@ -645,7 +689,7 @@ export default function Home() {
                     placeholder="Amount (BUDDY)"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className="w-full lg:w-1/2 p-3 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xl transition-all duration-300"
+                    className="w-full lg:w-1/2 p-3 text-center rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xl transition-all duration-300"
                   />
                   <div className="flex gap-2">
                     <button
@@ -725,7 +769,9 @@ export default function Home() {
                   </div>
                   <div>
                     <p className="text-sm uppercase text-gray-300">Total Staked</p>
-                    <p className="text-2xl font-extrabold">{parseFloat(totalActual).toFixed(0)} BUDDY</p>
+                    <p className="text-2xl font-extrabold">
+                      {(parseFloat(totalActual) / 1e6).toFixed(2)} M BUDDY
+                    </p>
                   </div>
                   <div>
                     <p className="text-sm uppercase text-gray-300">Total Rewards Given</p>
@@ -758,30 +804,30 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="relative inline-block mt-6">
-                    <div className="relative">
-                      <a
-                        href="https://mint.buddybattles.xyz"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="relative block bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 px-12 rounded-full shadow-lg hover:shadow-xl transition duration-300"
-                      >
-                        <span className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white text-blue-600 text-[10px] font-extrabold px-6 py-1 rounded-full shadow min-w-[150px] text-center">
-                          Want a Bonus?
-                        </span>
-                        Mint NFT
-                      </a>
-                      <button
-                        onClick={() => setShowInfo(!showInfo)}
-                        className="absolute right-[-12px] top-[60%] w-6 h-6 bg-gray-200 rounded-full shadow hover:bg-gray-300 transition flex items-center justify-center"
-                      >
-                        <span className="text-xs font-bold text-blue-600">i</span>
-                      </button>
+                  <div className="relative">
+                    <a
+                      href="https://mint.buddybattles.xyz"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative block bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 px-12 rounded-full shadow-lg hover:shadow-xl transition duration-300"
+                    >
+                      <span className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white text-blue-600 text-[10px] font-extrabold px-6 py-1 rounded-full shadow min-w-[150px] text-center">
+                        Want a Bonus?
+                      </span>
+                      Mint NFT
+                    </a>
+                    <button
+                      onClick={() => setShowInfo(!showInfo)}
+                      className="absolute right-[-12px] top-[60%] w-6 h-6 bg-gray-200 rounded-full shadow hover:bg-gray-300 transition flex items-center justify-center"
+                    >
+                      <span className="text-xs font-bold text-blue-600">i</span>
+                    </button>
+                  </div>
+                  {showInfo && (
+                    <div className="absolute z-10 mt-2 p-2 bg-gray-100 text-gray-700 text-xs rounded shadow">
+                      +2.5% extra per NFT first month, +5% extra after
                     </div>
-                    {showInfo && (
-                      <div className="absolute z-10 mt-2 p-2 bg-gray-100 text-gray-700 text-xs rounded shadow">
-                        +2.5% extra per NFT first month, +5% extra after
-                      </div>
-                    )}
+                  )}
                   {showInfo && (
                     <div className="absolute top-full left-0 z-10 mt-2 p-2 bg-gray-100 text-gray-700 text-xs rounded shadow">
                       +2.5% extra per NFT first month, +5% extra after
