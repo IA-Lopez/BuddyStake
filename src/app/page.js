@@ -12,7 +12,7 @@ const STAKING_CONTRACTS = {
 const BUDDY_TOKEN_ADDRESS = "0x38B54f147303887BD2E932373432FfCBD11Ff6a5";
 
 export default function Home() {
-  
+
   const { address, isConnected, chain } = useAccount();
   const [contractAddress, setContractAddress] = useState("");
   const [amount, setAmount] = useState("");
@@ -43,7 +43,7 @@ export default function Home() {
 
   const [mounted, setMounted] = useState(false);
   const [isSpinnerActive, setIsSpinnerActive] = useState(false);
-  
+
   useEffect(() => {
     if (isConnected) {
       setContractAddress(STAKING_CONTRACTS.electroneum);
@@ -325,7 +325,7 @@ export default function Home() {
         chain: chain.id,
         transport: custom(window.ethereum),
       });
-  
+
       const erc20ABI = [
         {
           name: "balanceOf",
@@ -335,14 +335,14 @@ export default function Home() {
           stateMutability: "view",
         },
       ];
-  
+
       const balance = await client.readContract({
         address: BUDDY_TOKEN_ADDRESS,
         abi: erc20ABI,
         functionName: "balanceOf",
         args: [address],
       });
-  
+
       const balanceFormatted = Number(balance) / 1e18;
       setAmount(balanceFormatted.toString());
     } catch (err) {
@@ -350,7 +350,7 @@ export default function Home() {
       alert("Error fetching token balance: " + err.message);
     }
   };
-  
+
 
   // Fetch staking info including new parameters and accumulated rewards
   const fetchStakingInfo = async () => {
@@ -665,18 +665,18 @@ export default function Home() {
               <div className="flex flex-wrap gap-4 justify-center mt-6">
                 <button
                   onClick={handleClaimRewards}
-                  className="bg-blue-600 hover:bg-blue-700 transition duration-200 py-3 px-6 rounded-lg text-xl font-bold"
+                  className="bg-blue-600 hover:bg-blue-700 transition duration-200 py-3 px-10 rounded-lg text-xl font-bold"
                 >
                   Claim Rewards
                 </button>
-                {bonusTimeRemaining === "Finished" && (
-                  <button
-                    onClick={handleUpdateMultiplier}
-                    className="bg-yellow-600 hover:bg-yellow-700 transition duration-200 py-3 px-6 rounded-lg text-xl font-bold"
-                  >
-                    Update Multiplier
-                  </button>
-                )}
+
+                <button
+                  onClick={handleUpdateMultiplier}
+                  className="bg-yellow-600 hover:bg-yellow-700 transition duration-200 py-3 px-6 rounded-lg text-xl font-bold"
+                >
+                  Update Multiplier
+                </button>
+
               </div>
             </div>
 
@@ -776,7 +776,7 @@ export default function Home() {
                       <p className="text-2xl font-extrabold">{bonusTimeRemaining}</p>
                       {bonusTimeRemaining === "Finished" && (
                         <p className="text-red-500 font-semibold text-lg">
-                          Eligible! Click Update Multiplier!
+                          Eligible for 2x bonus. Click Update Multiplier
                         </p>
                       )}
                     </div>
