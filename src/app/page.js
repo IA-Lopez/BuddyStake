@@ -721,7 +721,7 @@ export default function Home() {
                   </div>
                   <div>
                     <p className="text-sm uppercase text-gray-300">Staking Bonus</p>
-                    <p className="text-2xl font-extrabold">
+                    <p className="text-3xl font-extrabold">
                       <span className="text-green-300"> +{individualMultiplier}%</span>
                     </p>
                   </div>
