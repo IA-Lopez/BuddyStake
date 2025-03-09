@@ -656,7 +656,7 @@ export default function Home() {
                   {stakeTimestamp > 0 &&
                     new Date().getTime() < stakeTimestamp * 1000 + Number(earlyWithdrawalPeriodState) * 24 * 60 * 60 * 1000 && (
                       <p className="mt-2 text-red-500 text-lg font-semibold text-center">
-                        Warning: Withdrawing now will incur a 30% penalty because the early withdrawal period hasn’t passed.
+                        WARNING: the early withdrawal period hasn’t passed<br/> Withdrawing now will incur a 30% PENALTY of all the STAKED FUNDS retrieved.
                       </p>
                     )}
                 </div>
