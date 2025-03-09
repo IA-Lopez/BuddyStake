@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import { createPublicClient, custom, encodeFunctionData, parseUnits } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-
+import LoadingSpinner from "../components/LoadingSpinner";
 const STAKING_CONTRACTS = {
   electroneum: "0x007481e3F2C1ee5E4e767639C29c726b246Dd743",
 };
@@ -12,6 +12,7 @@ const STAKING_CONTRACTS = {
 const BUDDY_TOKEN_ADDRESS = "0x38B54f147303887BD2E932373432FfCBD11Ff6a5";
 
 export default function Home() {
+  
   const { address, isConnected, chain } = useAccount();
   const [contractAddress, setContractAddress] = useState("");
   const [amount, setAmount] = useState("");
@@ -40,6 +41,9 @@ export default function Home() {
   const [earlyWithdrawalPenaltyState, setEarlyWithdrawalPenaltyState] = useState("N/A");
   const [totalRewardsAccumulatedState, setTotalRewardsAccumulatedState] = useState("N/A");
 
+  const [mounted, setMounted] = useState(false);
+  const [isSpinnerActive, setIsSpinnerActive] = useState(false);
+  
   useEffect(() => {
     if (isConnected) {
       setContractAddress(STAKING_CONTRACTS.electroneum);
@@ -75,6 +79,14 @@ export default function Home() {
     }, 1000);
     return () => clearInterval(timer);
   }, [stakeTimestamp]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <div>Loading...</div>;
+  }
 
   const waitForTransactionReceipt = async (txHash) => {
     let receipt = null;
@@ -163,10 +175,10 @@ export default function Home() {
   const handleStake = async () => {
     if (!amount || !isConnected) return;
     try {
+      setIsSpinnerActive(true);
       await window.ethereum.request({ method: "eth_requestAccounts" });
       const stakeAmount = parseUnits(amount, 18);
       await checkAndApprove(stakeAmount);
-
       const stakeData = encodeFunctionData({
         abi: [
           {
@@ -194,10 +206,10 @@ export default function Home() {
         params: [tx],
       });
       console.log("Stake transaction sent:", txHash);
-      alert("Stake transaction sent: " + txHash);
     } catch (err) {
       console.error("Error in stake:", err);
-      alert("Error in stake: " + err.message);
+    } finally {
+      setIsSpinnerActive(false);
     }
   };
 
@@ -627,6 +639,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white py-12 pt-24 flex items-center">
+      {isSpinnerActive && <LoadingSpinner />}
       <div className="w-full max-w-6xl mx-auto px-4">
         {!isConnected ? (
           <div className="flex flex-col items-center">
@@ -825,12 +838,7 @@ export default function Home() {
                   </div>
                   {showInfo && (
                     <div className="absolute z-10 mt-2 p-2 bg-gray-100 text-gray-700 text-xs rounded shadow">
-                      +2.5% extra per NFT first month, +5% extra after
-                    </div>
-                  )}
-                  {showInfo && (
-                    <div className="absolute top-full left-0 z-10 mt-2 p-2 bg-gray-100 text-gray-700 text-xs rounded shadow">
-                      +2.5% extra per NFT first month, +5% extra after
+                      +2.5% extra per NFT first month, +5% after that
                     </div>
                   )}
                 </div>
