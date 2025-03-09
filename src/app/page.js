@@ -588,11 +588,11 @@ export default function Home() {
                       placeholder="Amount (BUDDY)"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
-                      className="w-full p-3 rounded-lg text-center bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xl transition-all duration-300"
+                      className="w-full p-3 rounded-lg text-center bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xl transition-all duration-300 z-10"
                     />
                     <button
                       type="button"
-                      onClick={handleSetMax} // Esta función debe llamar al contrato y setear el valor en el input
+                      onClick={handleSetMax} 
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white text-sm font-bold"
                     >
                       MAX
