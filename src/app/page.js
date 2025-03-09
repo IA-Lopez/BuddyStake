@@ -734,7 +734,7 @@ export default function Home() {
                       rel="noopener noreferrer"
                       className="relative block bg-gradient-to-r from-blue-600 to-purple-600 text-white text-[20px] font-bold py-4 px-14 rounded-full shadow-lg hover:shadow-xl transition duration-300"
                     >
-                      <span className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white text-blue-600 text-[12px] font-extrabold px-4 py-1 rounded-full shadow min-w-[140px] text-center">
+                      <span className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-white text-blue-600 text-[12px] font-extrabold px-4 py-1 rounded-full shadow min-w-[145px] text-center">
                         WANT A BONUS?
                       </span>
                       MINT NFT
