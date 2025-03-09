@@ -50,11 +50,11 @@ export default function Home() {
     }
   }, [isConnected, chain]);
 
-  // Fetch staking info every 2 seconds
+  // Fetch staking info
   useEffect(() => {
     const interval = setInterval(() => {
       fetchStakingInfo();
-    }, 2000);
+    }, 6000);
     return () => clearInterval(interval);
   }, [contractAddress, address, chain]);
 
