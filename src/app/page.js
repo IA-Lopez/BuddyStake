@@ -161,7 +161,7 @@ export default function Home() {
         params: [approveTx],
       });
       console.log("Approval transaction sent:", txHash);
-      alert("Approval transaction sent: " + txHash);
+
       const receipt = await waitForTransactionReceipt(txHash);
       if (!receipt || receipt.status !== "0x1") {
         throw new Error("Approval transaction failed");
@@ -244,7 +244,6 @@ export default function Home() {
         params: [tx],
       });
       console.log("Unstake transaction sent:", txHash);
-      alert("Unstake transaction sent: " + txHash);
     } catch (err) {
       console.error("Error in unstake:", err);
       alert("Error in unstake: " + err.message);
@@ -279,7 +278,6 @@ export default function Home() {
         params: [tx],
       });
       console.log("Claim rewards transaction sent:", txHash);
-      alert("Claim rewards transaction sent: " + txHash);
     } catch (err) {
       console.error("Error in claim rewards:", err);
       alert("Error in claim rewards: " + err.message);
@@ -314,96 +312,9 @@ export default function Home() {
         params: [tx],
       });
       console.log("Update multiplier transaction sent:", txHash);
-      alert("Update multiplier transaction sent: " + txHash);
     } catch (err) {
       console.error("Error in update multiplier:", err);
       alert("Error in update multiplier: " + err.message);
-    }
-  };
-
-  // Helper function for unstaking by percentage
-  const handleUnstakePercentage = async (percentage) => {
-    if (!isConnected) return;
-    try {
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-      const currentStaked = Number(individualActual);
-      if (currentStaked <= 0) {
-        alert("No staked amount available");
-        return;
-      }
-      if (percentage === 100) {
-        // For 100%, call withdrawAll
-        await handleWithdrawAll();
-        return;
-      }
-      // Calculate the unstake amount (as a percentage of current staked)
-      const unstakeAmount = parseUnits((currentStaked * (percentage / 100)).toString(), 18);
-      const unstakeData = encodeFunctionData({
-        abi: [
-          {
-            name: "withdraw",
-            type: "function",
-            inputs: [
-              { name: "token", type: "address" },
-              { name: "amount", type: "uint256" },
-            ],
-          },
-        ],
-        functionName: "withdraw",
-        args: [BUDDY_TOKEN_ADDRESS, unstakeAmount],
-      });
-      const accounts = await window.ethereum.request({ method: "eth_accounts" });
-      const senderAddress = accounts[0];
-      const tx = {
-        to: contractAddress,
-        from: senderAddress,
-        data: unstakeData,
-        value: "0x0",
-      };
-      const txHash = await window.ethereum.request({
-        method: "eth_sendTransaction",
-        params: [tx],
-      });
-      console.log(`Unstake ${percentage}% transaction sent:`, txHash);
-      alert(`Unstake ${percentage}% transaction sent: ${txHash}`);
-    } catch (err) {
-      console.error(`Error in unstake ${percentage}%:`, err);
-      alert(`Error in unstake ${percentage}%: ${err.message}`);
-    }
-  };
-
-  const handleWithdrawAll = async () => {
-    if (!isConnected) return;
-    try {
-      await window.ethereum.request({ method: "eth_requestAccounts" });
-      const withdrawAllData = encodeFunctionData({
-        abi: [
-          {
-            name: "withdrawAll",
-            type: "function",
-            inputs: [{ name: "token", type: "address" }],
-          },
-        ],
-        functionName: "withdrawAll",
-        args: [BUDDY_TOKEN_ADDRESS],
-      });
-      const accounts = await window.ethereum.request({ method: "eth_accounts" });
-      const senderAddress = accounts[0];
-      const tx = {
-        to: contractAddress,
-        from: senderAddress,
-        data: withdrawAllData,
-        value: "0x0",
-      };
-      const txHash = await window.ethereum.request({
-        method: "eth_sendTransaction",
-        params: [tx],
-      });
-      console.log("Withdraw all transaction sent:", txHash);
-      alert("Withdraw all transaction sent: " + txHash);
-    } catch (err) {
-      console.error("Error in withdraw all:", err);
-      alert("Error in withdraw all: " + err.message);
     }
   };
 
@@ -432,7 +343,6 @@ export default function Home() {
         args: [address],
       });
   
-      // Convertimos el balance (BigInt) a número formateado (con 18 decimales)
       const balanceFormatted = Number(balance) / 1e18;
       setAmount(balanceFormatted.toString());
     } catch (err) {

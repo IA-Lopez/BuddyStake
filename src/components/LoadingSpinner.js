@@ -20,7 +20,7 @@ const LoadingSpinner = () => {
   
       {/* Barra de progreso: z-index 10 */}
       <div className="relative w-full max-w-lg px-4 z-10">
-        <Progress value={progress} className="h-2 bg-blue-500" />
+        <Progress value={progress} className="h-2" />
       </div>
   
       {/* Logo: z-index 20 */}
