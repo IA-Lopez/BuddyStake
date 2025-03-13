@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
-import { createPublicClient, custom, encodeFunctionData, parseUnits } from "viem";
+import { createPublicClient, custom, encodeFunctionData, parseUnits, formatUnits } from "viem";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import LoadingSpinner from "../components/LoadingSpinner";
 const STAKING_CONTRACTS = {
@@ -344,8 +344,8 @@ export default function Home() {
         args: [address],
       });
 
-      const balanceFormatted = Number(balance) / 1e18;
-      setAmount(balanceFormatted.toString());
+    const balanceFormatted = formatUnits(balance, 18);
+    setAmount(balanceFormatted);
     } catch (err) {
       console.error("Error fetching token balance:", err);
       alert("Error fetching token balance: " + err.message);
