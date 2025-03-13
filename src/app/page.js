@@ -52,7 +52,6 @@ export default function Home() {
 
   // Fetch staking info
   useEffect(() => {
-    fetchStakingInfo();
     const interval = setInterval(() => {
       fetchStakingInfo();
     }, 6000);
