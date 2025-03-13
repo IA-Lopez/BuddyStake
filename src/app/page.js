@@ -52,6 +52,7 @@ export default function Home() {
 
   // Fetch staking info
   useEffect(() => {
+    fetchStakingInfo();
     const interval = setInterval(() => {
       fetchStakingInfo();
     }, 6000);
@@ -350,7 +351,6 @@ export default function Home() {
       alert("Error fetching token balance: " + err.message);
     }
   };
-
 
   // Fetch staking info including new parameters and accumulated rewards
   const fetchStakingInfo = async () => {
